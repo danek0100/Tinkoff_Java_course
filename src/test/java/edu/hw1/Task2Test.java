@@ -28,7 +28,7 @@ public class Task2Test {
     @Test
     public void testGetDigitsNumber_EdgeCases() {
         assertThat(Task2.countDigits(Long.MAX_VALUE)).isEqualTo(19); // Max long value is 19 digits
-        assertThat(Task2.countDigits(Long.MIN_VALUE) + 1).isEqualTo(19); // Min long value is also 19 digits (ignoring the negative sign)
-        assertThat(Task2.countDigits(Long.MIN_VALUE)).isEqualTo(1); // Min long value is also 19 digits (ignoring the negative sign)
+        assertThat(Task2.countDigits(Long.MIN_VALUE + 1)).isEqualTo(19); // Min long value is also 19 digits (ignoring the negative sign)
+        assertThat(Task2.countDigits(Long.MIN_VALUE)).isEqualTo(-1); // Min long value is also 19 digits (ignoring the negative sign)
     }
 }
