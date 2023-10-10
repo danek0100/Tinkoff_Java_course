@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
  */
 public class Task1 {
 
+    private final static int SECONDS_IN_MINUTE = 60;
+
     /**
      * Converts a video duration string from mm:ss format to total seconds.
      * <p>
@@ -30,12 +32,12 @@ public class Task1 {
 
         try {
             long seconds = Long.parseLong(input.substring(input.lastIndexOf(':') + 1));
-            if (seconds >= 60) {
+            if (seconds >= SECONDS_IN_MINUTE) {
                 return -1;
             }
 
             long minutes = Long.parseLong(input.substring(0, input.lastIndexOf(':')));
-            return minutes * 60 + seconds;
+            return minutes * SECONDS_IN_MINUTE + seconds;
         } catch (NumberFormatException e) {
             return -1;
         }

@@ -1,6 +1,5 @@
 package edu.hw1;
 
-import java.util.Arrays;
 
 public class Task7 {
 
@@ -14,9 +13,9 @@ public class Task7 {
      */
     public static int rotateLeft(int n, int shift, int bitLength) {
         int mask = (1 << bitLength) - 1;
-        n &= mask;
-        shift = shift % bitLength;
-        return ((n << shift) & mask) | ((n >>> (bitLength - shift)) & mask);
+        int maskedN = n & mask;
+        int cutShift = shift % bitLength;
+        return ((maskedN << cutShift) & mask) | ((maskedN >>> (bitLength - cutShift)) & mask);
     }
 
     /**
@@ -29,9 +28,9 @@ public class Task7 {
      */
     public static int rotateRight(int n, int shift, int bitLength) {
         int mask = (1 << bitLength) - 1;
-        n &= mask;
-        shift = shift % bitLength;
-        return ((n >>> shift) & mask) | ((n << (bitLength - shift)) & mask);
+        int maskedN = n & mask;
+        int cutShift = shift % bitLength;
+        return ((maskedN >>> cutShift) & mask) | ((maskedN << (bitLength - cutShift)) & mask);
     }
 
     private Task7() {}

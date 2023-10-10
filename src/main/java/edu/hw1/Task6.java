@@ -4,6 +4,11 @@ import java.util.Arrays;
 
 public class Task6 {
 
+    private final static int MIN_NUMBER = 1001;
+    private final static int MAX_NUMBER = 9999;
+    private final static int TARGET_NUMBER = 6174;
+    private final static String NUMBER_PATTERN = "%04d";
+
     /**
      * Initiates the process of finding the number of steps required to reach Kaprekar's constant (6174).
      *
@@ -12,7 +17,7 @@ public class Task6 {
      */
     public static int countK(int num) {
         // Check for invalid input
-        if (num < 1001 || num > 9999 || allDigitsSame(num)) {
+        if (num < MIN_NUMBER || num > MAX_NUMBER || allDigitsSame(num)) {
             return -1;
         }
         return countKRecursive(num);
@@ -26,12 +31,12 @@ public class Task6 {
      */
     private static int countKRecursive(int num) {
         // Base case: if the number is already 6174
-        if (num == 6174) {
+        if (num == TARGET_NUMBER) {
             return 0;
         }
 
         // Convert the number to a string and sort its digits
-        String numStr = String.format("%04d", num);
+        String numStr = String.format(NUMBER_PATTERN, num);
         String ascending = sortString(numStr);
         String descending = new StringBuilder(ascending).reverse().toString();
 
@@ -51,7 +56,7 @@ public class Task6 {
      * @return true if all digits are the same, false otherwise.
      */
     private static boolean allDigitsSame(int num) {
-        char[] digits = String.format("%04d", num).toCharArray();
+        char[] digits = String.format(NUMBER_PATTERN, num).toCharArray();
         for (int i = 1; i < digits.length; i++) {
             if (digits[i] != digits[0]) {
                 return false;

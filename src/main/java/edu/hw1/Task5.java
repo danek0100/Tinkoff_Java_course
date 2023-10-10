@@ -3,6 +3,8 @@ package edu.hw1;
 
 public class Task5 {
 
+    private final static int MINIMUM_NUM = 10;
+
     /**
      * Checks if the number or any of its descendants is a palindrome.
      *
@@ -10,16 +12,17 @@ public class Task5 {
      * @return True if the number or any of its descendants is a palindrome, false otherwise.
      */
     public static boolean isPalindromeDescendant(int num) {
-        if (isPalindrome(num) && num >= 10) {
+        if (isPalindrome(num) && num >= MINIMUM_NUM) {
             return true;
         }
 
-        while (num >= 10) {
-            num = createDescendant(num);
-            if (num < 10) {
+        int actualNum = num;
+        while (actualNum >= MINIMUM_NUM) {
+            actualNum = createDescendant(actualNum);
+            if (actualNum < MINIMUM_NUM) {
                 return false;
             }
-            if (isPalindrome(num)) {
+            if (isPalindrome(actualNum)) {
                 return true;
             }
         }

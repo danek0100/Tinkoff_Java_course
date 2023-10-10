@@ -6,6 +6,9 @@ public class Task8 {
     private static final int EMPTY = 0;
     private static final int KNIGHT = 1;
 
+    private static final int SINGLE_STEP = 1;
+    private static final int DOUBLE_STEP = 2;
+
     /**
      * Checks if the knights on a given 8x8 board are positioned such that
      * they cannot capture each other.
@@ -19,10 +22,10 @@ public class Task8 {
         }
 
         int[][] moves = {
-            {-2, -1}, {-2, 1},
-            {-1, -2}, {-1, 2},
-            {1, -2}, {1, 2},
-            {2, -1}, {2, 1}
+            {-DOUBLE_STEP, -SINGLE_STEP}, {-DOUBLE_STEP, SINGLE_STEP},
+            {-SINGLE_STEP, -DOUBLE_STEP}, {-SINGLE_STEP, DOUBLE_STEP},
+            {SINGLE_STEP, -DOUBLE_STEP}, {SINGLE_STEP, DOUBLE_STEP},
+            {DOUBLE_STEP, -SINGLE_STEP}, {DOUBLE_STEP, SINGLE_STEP}
         };
 
         for (int i = 0; i < BOARD_SIZE; ++i) {

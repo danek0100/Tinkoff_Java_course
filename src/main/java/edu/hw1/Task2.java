@@ -3,6 +3,8 @@ package edu.hw1;
 
 public class Task2 {
 
+    private final static int BASE = 10;
+
     /**
      * Returns the number of digits in the decimal form of a given number.
      * <p>
@@ -18,18 +20,18 @@ public class Task2 {
      */
     public static long countDigits(long number) {
         // Take the absolute value in case the number is negative
-        number = Math.abs(number);
+        long absoluteNumber = Math.abs(number);
 
-        if (number < 0) {
+        if (absoluteNumber < 0) {
             return -1;
         }
 
         long power = 0;
         long digitsNum = 1;
         do {
-            digitsNum *= 10;
+            digitsNum *= BASE;
             power++;
-        } while (number / digitsNum > 0);
+        } while (absoluteNumber / digitsNum > 0);
 
         return power;
     }
