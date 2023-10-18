@@ -9,7 +9,7 @@ public class Task2 {
         protected final int width;
         protected final int height;
 
-        public Rectangle(int width, int height) {
+        Rectangle(int width, int height) {
             this.width = width;
             this.height = height;
         }
@@ -33,7 +33,7 @@ public class Task2 {
     }
 
     static final class Square extends Rectangle {
-        public Square(int side) {
+        Square(int side) {
             super(side, side);
         }
 
