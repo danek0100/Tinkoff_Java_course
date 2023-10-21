@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -59,6 +57,20 @@ public class ConsoleHangmanTest {
         assertThrows(IllegalArgumentException.class, reader::readUserSingleCharInput);
     }
 
+    static class MockOutput implements Output {
+        private final StringBuilder capturedOutput = new StringBuilder();
+
+        @Override
+        public void log(String message) {
+            capturedOutput.append(message).append("\n");
+        }
+
+        public String getCapturedOutput() {
+            return capturedOutput.toString();
+        }
+    }
+
+
     @Test
     @DisplayName("Test full game cycle with user inputs")
     public void testFullGameCycle() throws IOException {
@@ -82,14 +94,11 @@ public class ConsoleHangmanTest {
             }
         }).start();
 
-        ConsoleHangman game = new ConsoleHangman(new FileDictionary("./src/test/java/edu/project1/valid_dict_1.txt"));
+        MockOutput mockOutput = new MockOutput();
+        ConsoleHangman game = new ConsoleHangman(new FileDictionary("./src/test/java/edu/project1/valid_dict_1.txt"), mockOutput);
         game.run();
 
-        String output = byteArrayOutputStream.toString();
-        if (output.isEmpty()){
-            String outputFilePath = "target/surefire-reports/edu.project1.ConsoleHangmanTest-output.txt";
-            output = new String(Files.readAllBytes(Paths.get(outputFilePath)));
-        }
+        String output = mockOutput.getCapturedOutput();
         output = output.replaceAll("\\x1B\\[[;\\d]*m", "");
         String outputUtf8 = new String(output.getBytes(StandardCharsets.UTF_8));
         assertTrue(outputUtf8.contains("You won!"));

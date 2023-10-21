@@ -1,9 +1,5 @@
 package edu.project1;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-
 /**
  * Console-based implementation of the Hangman game.
  * This class provides methods to interact with the user and manage the game session.
@@ -11,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 public class ConsoleHangman {
     private final Dictionary dictionary;
     private static final InputReader INPUT_READER = new InputReader();
-    private final static Logger LOGGER = LogManager.getLogger();
+    private final Output logger;
 
     /**
      * Constructor for the ConsoleHangman game.
@@ -20,27 +16,39 @@ public class ConsoleHangman {
      */
     public ConsoleHangman(Dictionary dictionary) {
         this.dictionary = dictionary;
+        logger = new StandardOutput();
+    }
+
+    /**
+     * Constructor for the ConsoleHangman game.
+     *
+     * @param dictionary The dictionary from which words are chosen.
+     * @param logger The logger to output text.
+     */
+    public ConsoleHangman(Dictionary dictionary, Output logger) {
+        this.dictionary = dictionary;
+        this.logger = logger;
     }
 
     /**
      * Display the initial menu to the user.
      */
-    private static void showInitialMenu() {
-        LOGGER.info("> Welcome to Hangman!");
-        LOGGER.info("> 1. View rules");
-        LOGGER.info("> 2. Start game");
-        LOGGER.info("> Enter your choice (1/2): ");
+    private void showInitialMenu() {
+        logger.log("> Welcome to Hangman!");
+        logger.log("> 1. View rules");
+        logger.log("> 2. Start game");
+        logger.log("> Enter your choice (1/2): ");
     }
 
     /**
      * Display the rules of the Hangman game to the user.
      */
-    private static void showRules() {
-        LOGGER.info("> Rules of the Hangman game:");
-        LOGGER.info("> 1. A word is selected at random.");
-        LOGGER.info("> 2. You have to guess the word letter by letter.");
-        LOGGER.info("> 3. You can give up anytime by typing 'give_up'.");
-        LOGGER.info("> 4. Enjoy the game!\n");
+    private void showRules() {
+        logger.log("> Rules of the Hangman game:");
+        logger.log("> 1. A word is selected at random.");
+        logger.log("> 2. You have to guess the word letter by letter.");
+        logger.log("> 3. You can give up anytime by typing 'give_up'.");
+        logger.log("> 4. Enjoy the game!\n");
     }
 
     /**
@@ -48,12 +56,12 @@ public class ConsoleHangman {
      * and controls the game flow.
      */
     public void run() {
-        LOGGER.info("> Word loading...");
+        logger.log("> Word loading...");
         try {
             Session session = new Session(dictionary.randomWord());
             playGame(session);
         } catch (IllegalArgumentException e) {
-            LOGGER.info("> Error: " + e.getMessage());
+            logger.log("> Error: " + e.getMessage());
         }
     }
 
@@ -67,13 +75,13 @@ public class ConsoleHangman {
         GuessResult result = null;
         String input;
         do {
-            LOGGER.info("> Guess a letter: ");
+            logger.log("> Guess a letter: ");
             try {
                 input = INPUT_READER.readUserSingleCharInput();
                 result = tryGuess(session, input);
                 printState(result);
             } catch (IllegalArgumentException e) {
-                LOGGER.info(e.getMessage());
+                logger.log(e.getMessage());
             }
         } while (!(result instanceof GuessResult.PlayerWin) && !(result instanceof GuessResult.PlayerDefeat));
     }
@@ -86,12 +94,12 @@ public class ConsoleHangman {
     }
 
     private void printState(GuessResult guess) {
-        LOGGER.info("> " + guess.message());
-        LOGGER.info("> The word: " + new String(guess.state()));
+        logger.log("> " + guess.message());
+        logger.log("> The word: " + new String(guess.state()));
     }
 
     private boolean askPlayAgain() {
-        LOGGER.info("> Do you want to play again? (yes/no): ");
+        logger.log("> Do you want to play again? (yes/no): ");
         String response = INPUT_READER.readUserInput().trim().toLowerCase();
         return "yes".equals(response);
     }
@@ -101,7 +109,7 @@ public class ConsoleHangman {
      *
      * @param args Command line arguments. Optionally, the path to a dictionary file can be provided.
      */
-    public static void execute(String[] args) {
+    public void execute(String[] args) {
         ConsoleHangman game;
         if (args.length == 1) {
             game = new ConsoleHangman(new FileDictionary(args[0]));
@@ -115,7 +123,7 @@ public class ConsoleHangman {
         if ("1".equals(choice)) {
             showRules();
         } else if (!"2".equals(choice)) {
-            LOGGER.info("> Invalid choice. Exiting.");
+            logger.log("> Invalid choice. Exiting.");
             return;
         }
 
