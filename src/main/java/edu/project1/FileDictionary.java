@@ -42,6 +42,8 @@ public class FileDictionary implements Dictionary {
         if (dictionary.isEmpty()) {
             throw new IllegalStateException("Dictionary is empty!");
         }
-        return dictionary.get(random.nextInt(dictionary.size()));
+        String word = dictionary.get(random.nextInt(dictionary.size()));
+        checkWord(word);
+        return word;
     }
 }

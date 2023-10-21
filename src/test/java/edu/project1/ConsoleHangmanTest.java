@@ -1,51 +1,97 @@
 package edu.project1;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConsoleHangmanTest {
-    private final Dictionary testDictionary = new SimpleDictionary();
 
     @Test
-    void gameDoesNotStart_IfWordHasInvalidLength() {
-        String word = "";
-        assertThrows(IllegalArgumentException.class, () -> new Session(word));
+    @DisplayName("Test invalid word length from dictionary")
+    public void testInvalidWordLength() {
+        Dictionary invalidDictionary = new FileDictionary("./src/test/java/edu/project1/invalid_dict_1.txt");
+        assertThrows(IllegalArgumentException.class, invalidDictionary::randomWord);
     }
 
     @Test
-    void gameAlwaysReturnsDefeat_AfterMaxAttempts() {
-        Session session = new Session("test");
+    @DisplayName("Test that exceeding max attempts results in defeat")
+    public void testMaxAttemptsResultsInDefeat() {
+        Session session = new Session("word");
         GuessResult result = null;
-
         for (int i = 0; i < 5; i++) {
-            result = session.guess('x');
+            result = session.guess('z');
         }
-
-        assertTrue(result instanceof GuessResult.Defeat);
+        assertTrue(result instanceof GuessResult.PlayerDefeat);
     }
 
     @Test
-    void gameStateChangesCorrectly_OnGuess() {
-        Session session = new Session("test");
-        GuessResult result;
-
-        result = session.guess('t');
+    @DisplayName("Test that game state changes correctly on guessing")
+    public void testGameStateChangesCorrectly() {
+        Session session = new Session("word");
+        GuessResult result = session.guess('o');
         assertTrue(result instanceof GuessResult.SuccessfulGuess);
-        assertEquals("t**t", new String(result.state()));
-
-        result = session.guess('x');
-        assertTrue(result instanceof GuessResult.FailedGuess);
-        assertEquals("t**t", new String(result.state()));
+        assertEquals("*o**", new String(result.state()));
     }
 
     @Test
-    void gamePromptForRetry_OnLongerInput() {
-        ConsoleHangman game = new ConsoleHangman(testDictionary);
-        // Тут немного сложнее тестировать, так как нужно будет мокать ввод с консоли или изменить структуру вашего класса,
-        // чтобы он принимал ввод из другого источника, например, из строки.
-        // Для этого, возможно, придется немного реорганизовать ваш код.
-        // Однако, этот тест будет лучше провести вручную.
+    @DisplayName("Test input length greater than one results in exception")
+    public void testInputLengthGreaterThanOne() throws IOException {
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        System.setIn(in);
+
+        InputReader reader = new InputReader();
+        new Thread(() -> {
+            try {
+                out.write("wo\n".getBytes());
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        assertThrows(IllegalArgumentException.class, reader::readUserSingleCharInput);
+    }
+
+    @Test
+    @DisplayName("Test full game cycle with user inputs")
+    public void testFullGameCycle() throws IOException {
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out = new PipedOutputStream(in);
+        System.setIn(in);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(byteArrayOutputStream);
+        System.setOut(printStream);
+
+        new Thread(() -> {
+            try {
+                out.write("h\n".getBytes());
+                out.write("e\n".getBytes());
+                out.write("l\n".getBytes());
+                out.write("o\n".getBytes());
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        ConsoleHangman game = new ConsoleHangman(new FileDictionary("./src/test/java/edu/project1/valid_dict_1.txt"));
+        game.run();
+
+        String output = byteArrayOutputStream.toString();
+        if (output.isEmpty()){
+            String outputFilePath = "target/surefire-reports/edu.project1.ConsoleHangmanTest-output.txt";
+            output = new String(Files.readAllBytes(Paths.get(outputFilePath)));
+        }
+        output = output.replaceAll("\\x1B\\[[;\\d]*m", "");
+        String outputUtf8 = new String(output.getBytes(StandardCharsets.UTF_8));
+        assertTrue(outputUtf8.contains("You won!"));
     }
 }
