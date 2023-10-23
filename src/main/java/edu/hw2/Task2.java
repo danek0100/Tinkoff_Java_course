@@ -72,28 +72,6 @@ public class Task2 {
         Square(int side) {
             super(side, side);
         }
-
-        /**
-         * Returns a new square with updated side length.
-         *
-         * @param side the new side length for the square
-         * @return a new square with updated side length
-         */
-        @Override
-        public Square setWidth(int side) {
-            return new Square(side);
-        }
-
-        /**
-         * Returns a new square with updated side length. This method is equivalent
-         * to {@link #setWidth(int)} since a square's width and height are always equal.
-         *
-         * @param side the new side length for the square
-         * @return a new square with updated side length
-         */
-        @Override
-        public Square setHeight(int side) {
-            return new Square(side);
-        }
     }
 }
+

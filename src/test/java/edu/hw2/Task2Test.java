@@ -24,26 +24,6 @@ public class Task2Test {
         rect = rect.setWidth(20);
         rect = rect.setHeight(10);
 
-        assertThat(rect.area()).isEqualTo(rect instanceof Task2.Square ? 100 : 200.0);
+        assertThat(rect.area()).isEqualTo(200.0);
     }
-
-    @Test
-    @DisplayName("Negative Test: Incorrect area calculation for Rectangle")
-    void negativeTestRectangleArea() {
-        Task2.Rectangle rect = new Task2.Rectangle(10, 5);
-        rect = rect.setWidth(15);
-
-        assertThat(rect.area()).isNotEqualTo(50.0);
-    }
-
-    @Test
-    @DisplayName("Negative Test: Incorrect area calculation for Square")
-    void negativeTestSquareArea() {
-        Task2.Square square = new Task2.Square(10);
-        square = square.setWidth(15);
-
-        assertThat(square.area()).isNotEqualTo(100.0);
-    }
-
-
 }
