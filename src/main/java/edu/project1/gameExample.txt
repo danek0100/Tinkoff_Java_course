@@ -1,0 +1,40 @@
+16:01:08.648 INFO  [main           ] .ConsoleHangman -- > Welcome to Hangman!
+16:01:08.651 INFO  [main           ] .ConsoleHangman -- > 1. View rules
+16:01:08.651 INFO  [main           ] .ConsoleHangman -- > 2. Start game
+16:01:08.651 INFO  [main           ] .ConsoleHangman -- > Enter your choice (1/2):
+1
+16:01:14.478 INFO  [main           ] .ConsoleHangman -- > Rules of the Hangman game:
+16:01:14.478 INFO  [main           ] .ConsoleHangman -- > 1. A word is selected at random.
+16:01:14.478 INFO  [main           ] .ConsoleHangman -- > 2. You have to guess the word letter by letter.
+16:01:14.478 INFO  [main           ] .ConsoleHangman -- > 3. You can give up anytime by typing 'give_up'.
+16:01:14.478 INFO  [main           ] .ConsoleHangman -- > 4. Enjoy the game!
+
+16:01:14.478 INFO  [main           ] .ConsoleHangman -- > Word loading...
+16:01:14.479 INFO  [main           ] .ConsoleHangman -- > Guess a letter:
+p
+16:01:17.706 INFO  [main           ] .ConsoleHangman -- > Missed, mistake 1 out of 5.
+16:01:17.706 INFO  [main           ] .ConsoleHangman -- > The word: ****
+16:01:17.706 INFO  [main           ] .ConsoleHangman -- > Guess a letter:
+h
+16:01:20.433 INFO  [main           ] .ConsoleHangman -- > Missed, mistake 2 out of 5.
+16:01:20.433 INFO  [main           ] .ConsoleHangman -- > The word: ****
+16:01:20.433 INFO  [main           ] .ConsoleHangman -- > Guess a letter:
+w
+16:01:23.856 INFO  [main           ] .ConsoleHangman -- > Missed, mistake 3 out of 5.
+16:01:23.856 INFO  [main           ] .ConsoleHangman -- > The word: ****
+16:01:23.856 INFO  [main           ] .ConsoleHangman -- > Guess a letter:
+j
+16:01:26.059 INFO  [main           ] .ConsoleHangman -- > Hit!
+16:01:26.059 INFO  [main           ] .ConsoleHangman -- > The word: j***
+16:01:26.059 INFO  [main           ] .ConsoleHangman -- > Guess a letter:
+a
+16:01:27.164 INFO  [main           ] .ConsoleHangman -- > Hit!
+16:01:27.164 INFO  [main           ] .ConsoleHangman -- > The word: ja*a
+16:01:27.164 INFO  [main           ] .ConsoleHangman -- > Guess a letter:
+v
+16:01:28.229 INFO  [main           ] .ConsoleHangman -- > You won!
+16:01:28.229 INFO  [main           ] .ConsoleHangman -- > The word: java
+16:01:28.229 INFO  [main           ] .ConsoleHangman -- > Do you want to play again? (yes/no):
+no
+
+Process finished with exit code 0
