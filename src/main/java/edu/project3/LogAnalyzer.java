@@ -76,7 +76,7 @@ public class LogAnalyzer {
         }
     }
 
-    private void updateStatistics(LogRecord logRecord) {
+    void updateStatistics(LogRecord logRecord) {
         LocalDate ldt = logRecord.timeLocal().toLocalDate();
         if ((from != null && ldt.isBefore(from)) || (to != null && ldt.isAfter(to))) {
           return;
