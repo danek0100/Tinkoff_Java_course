@@ -47,18 +47,20 @@ public class ArgumentsAnalyzer {
     }
 
     private LogSource detectPathType(String pathString) {
+        if (pathString.startsWith("http") || pathString.startsWith("https")) {
+            try {
+                URI uri = new URI(pathString);
+                return new LogSource(pathString, LogSource.LogType.URI);
+            } catch (URISyntaxException ignored) {
+
+            }
+        }
         try {
             Path localPath = Paths.get(pathString);
             return new LogSource(pathString, LogSource.LogType.PATH);
         } catch (InvalidPathException ignored) {
         }
-        try {
-            URI uri = new URI(pathString);
-            return new LogSource(pathString, LogSource.LogType.URI);
-        } catch (URISyntaxException ex) {
-            return null;
-        }
-
+        return null;
     }
 
     public LocalDate getFrom() {
