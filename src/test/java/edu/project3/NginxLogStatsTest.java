@@ -37,6 +37,12 @@ public class NginxLogStatsTest {
         String expectedReportName = "nginix_report_" + formattedDate + ".md";
         Path expectedReportPath = Path.of(expectedReportName);
         assertTrue(Files.exists(expectedReportPath));
+
+        nginxLogStats.getStatics(new String[]{"--path", tempLogFile1.toString(), "--to",  "2015-07-15", "--from", "2015-06-01", "--format", "adoc"});
+        formattedDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        expectedReportName = "nginix_report_" + formattedDate + ".adoc";
+        expectedReportPath = Path.of(expectedReportName);
+        assertTrue(Files.exists(expectedReportPath));
     }
 
     @AfterEach
