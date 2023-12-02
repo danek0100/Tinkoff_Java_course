@@ -99,7 +99,7 @@ public class Task2FixedThreadPoolTest {
         // чем предполагает элементов дерево включая текущий уровень. Так как доступно 6 ядер,
         // то максимально в параллели будет 2 ветки: 3 <= 6 <= 7.
         // Не лучший способ, но показывает, что код работает.
-
+        // Assert не добавлен так как почему-то на GithubActions многопоточная версия работает дольше.
         //System.out.println("Single thread duration: " + durationSingleThread / 1e9 + " seconds");
         //System.out.println("Multi thread duration: " + durationMultiThread / 1e9 + " seconds");
     }

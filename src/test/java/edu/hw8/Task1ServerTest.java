@@ -13,23 +13,19 @@ import java.util.concurrent.TimeoutException;
 
 public class Task1ServerTest {
     private Task1Server.ClientHandlerFactory clientHandlerFactory;
-    private Task1Server.IQuoteService quoteService;
-    private Logger logger;
     private ServerSocket serverSocket;
     private Socket socket;
 
     @BeforeEach
     void setUp() throws IOException {
         clientHandlerFactory = mock(Task1Server.ClientHandlerFactory.class);
-        quoteService = mock(Task1Server.IQuoteService.class);
-        logger = mock(Logger.class);
         serverSocket = mock(ServerSocket.class);
         socket = mock(Socket.class);
         when(serverSocket.accept()).thenReturn(socket);
     }
 
     @Test
-    void testServerAcceptsConnections() throws IOException, InterruptedException, ExecutionException, TimeoutException {
+    void testServerAcceptsConnections() throws IOException, InterruptedException, TimeoutException {
         when(clientHandlerFactory.createClientHandler(any(Socket.class))).thenReturn(mock(Task1Server.ClientHandler.class));
         when(serverSocket.accept()).thenReturn(socket);
 

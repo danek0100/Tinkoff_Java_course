@@ -12,18 +12,19 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Task1NetworkTest {
 
     private Task1Server server;
     private Thread serverThread;
     private Task1Server.ClientHandlerFactory clientHandlerFactory;
-    private Task1Server.IQuoteService quoteService;
 
     @BeforeEach
     void setUp() {
-        quoteService = new Task1Server.QuoteService(new HashMap<>() {{
+        Task1Server.IQuoteService quoteService = new Task1Server.QuoteService(new HashMap<>() {{
             put("test", "Test Quote");
         }});
         clientHandlerFactory = new Task1Server.ClientHandlerFactory(quoteService, LogManager.getLogger());
@@ -41,7 +42,7 @@ public class Task1NetworkTest {
     }
 
     @AfterEach
-    void tearDown() throws IOException {
+    void tearDown() throws InterruptedException {
         server.stopServer();
         serverThread.interrupt();
     }
