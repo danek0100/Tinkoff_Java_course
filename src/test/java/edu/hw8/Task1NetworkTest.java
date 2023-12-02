@@ -42,9 +42,13 @@ public class Task1NetworkTest {
     }
 
     @AfterEach
-    void tearDown() throws InterruptedException {
-        server.stopServer();
-        serverThread.interrupt();
+    void tearDown() {
+        if (server != null) {
+            server.stopServer();
+        }
+        if (serverThread != null) {
+            serverThread.interrupt();
+        }
     }
 
     @Test
