@@ -55,9 +55,11 @@ public class LogReporter {
         appendKeyValue(report, "Начальная дата", from != null ? from.toString() : "-");
         appendKeyValue(report, "Конечная дата", to != null ? to.toString() : "-");
         appendKeyValue(report, "Количество запросов", String.format("%,d",
-            statistics.statisticsInt.getOrDefault("totalRequests", 0L)));
+            statistics.statisticsInt.getOrDefault(LogAnalyzer.TOTAL_REQUESTS, 0L)));
         appendKeyValue(report, "Средний размер ответа",
-            formatBytes(statistics.statisticsInt.getOrDefault("averageResponseSize", 0L)));
+            formatBytes(statistics.statisticsInt.getOrDefault(LogAnalyzer.AVERAGE_RESPONSE_SIZE, 0L)));
+        appendKeyValue(report, "Максимум запросов в минуту",
+            String.format("%,d", statistics.statisticsInt.getOrDefault(LogAnalyzer.MAX_REQUESTS_PER_MINUTE, 0L)));
         report.append("</table>\n");
 
         report.append("\n#### Запрашиваемые ресурсы\n");
@@ -195,9 +197,12 @@ public class LogReporter {
         appendKeyValueAdoc(report, "Начальная дата", from != null ? from.toString() : "-");
         appendKeyValueAdoc(report, "Конечная дата", to != null ? to.toString() : "-");
         appendKeyValueAdoc(report, "Количество запросов",
-            String.format("%,d", statistics.statisticsInt.getOrDefault("totalRequests", 0L)));
+            String.format("%,d", statistics.statisticsInt.getOrDefault(LogAnalyzer.TOTAL_REQUESTS, 0L)));
         appendKeyValueAdoc(report, "Средний размер ответа",
-            formatBytes(statistics.statisticsInt.getOrDefault("totalResponseSize", 0L)));
+            formatBytes(statistics.statisticsInt.getOrDefault(LogAnalyzer.AVERAGE_RESPONSE_SIZE, 0L)));
+        appendKeyValueAdoc(report, "Максимум запросов в минуту",
+            String.format("%,d",
+                statistics.statisticsInt.getOrDefault(LogAnalyzer.MAX_REQUESTS_PER_MINUTE, 0L)));
         report.append("|===\n");
 
         report.append("\n== Запрашиваемые ресурсы\n");

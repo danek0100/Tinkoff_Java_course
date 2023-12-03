@@ -10,38 +10,72 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ArgumentsAnalyzer {
     private static final List<String> AVAILABLE_ARGS = Arrays.asList("--path", "--from", "--to", "--format");
+
+    private enum ParseState {
+        PATH,
+        FROM,
+        TO,
+        FORMAT
+    }
+
     private LocalDate from = null;
     private LocalDate to = null;
     private OutputFormat format = OutputFormat.MARKDOWN;
     private final List<LogSource> sourceList = new ArrayList<>();
-    private static final int THIRD_STATE = 3;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+
+    private final static Logger LOGGER = LogManager.getLogger();
+
 
     ArgumentsAnalyzer() {
 
     }
 
     public void argumentsAnalyze(String[] args) {
-        int parseState = -1;
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+        ParseState parseState = null;
 
         for (String arg : args) {
+
             if (AVAILABLE_ARGS.contains(arg)) {
-                parseState = AVAILABLE_ARGS.indexOf(arg);
-            } else if (parseState == 0) {
-                LogSource logSource = detectPathType(arg);
-                if (logSource == null) {
-                    throw new IllegalArgumentException("Path not valid!");
+                parseState = ParseState.valueOf(arg.substring(2).toUpperCase());
+                continue;
+            }
+
+            if (parseState == null) {
+                throw new IllegalArgumentException("Unexpected argument: " + arg);
+            }
+
+            switch (parseState) {
+                case PATH -> {
+                    LogSource logSource = detectPathType(arg);
+                    if (logSource == null) {
+                        throw new IllegalArgumentException("Path not valid!");
+                    }
+                    sourceList.add(logSource);
                 }
-                sourceList.add(logSource);
-            } else if (parseState == 1) {
-                from = LocalDate.parse(arg, formatter);
-            } else if (parseState == 2) {
-                to = LocalDate.parse(arg, formatter);
-            } else if (parseState == THIRD_STATE) {
-                format = arg.equals("adoc") ? OutputFormat.ADOC : OutputFormat.MARKDOWN;
+                case FROM -> {
+                    LocalDate parsedDate = LocalDate.parse(arg, formatter);
+                    from = parsedDate;
+                }
+                case TO -> {
+                    LocalDate parsedDate = LocalDate.parse(arg, formatter);
+                    to = parsedDate;
+                }
+                case FORMAT -> {
+                    OutputFormat parsedFormat;
+                    if ("adoc".equals(arg)) {
+                        parsedFormat = OutputFormat.ADOC;
+                    } else {
+                        parsedFormat = OutputFormat.MARKDOWN;
+                    }
+                    format = parsedFormat;
+                }
+                default -> throw new IllegalStateException("Unexpected parse state: " + arg);
             }
         }
     }
@@ -51,14 +85,15 @@ public class ArgumentsAnalyzer {
             try {
                 URI uri = new URI(pathString);
                 return new LogSource(pathString, LogSource.LogType.URI);
-            } catch (URISyntaxException ignored) {
-
+            } catch (URISyntaxException uriSyntaxException) {
+                LOGGER.error(uriSyntaxException);
             }
         }
         try {
             Path localPath = Paths.get(pathString);
             return new LogSource(pathString, LogSource.LogType.PATH);
-        } catch (InvalidPathException ignored) {
+        } catch (InvalidPathException invalidPathException) {
+            LOGGER.error(invalidPathException);
         }
         return null;
     }

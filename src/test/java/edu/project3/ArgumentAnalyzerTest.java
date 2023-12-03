@@ -13,7 +13,7 @@ class ArgumentsAnalyzerTest {
     @Test
     void testValidArgumentsAnalyze() {
         ArgumentsAnalyzer argumentsAnalyzer = new ArgumentsAnalyzer();
-        String[] args = {"--path", "log.txt", "--from", "2023-01-01", "--to", "2023-12-31", "--format", "adoc"};
+        String[] args = {"--from", "2023-01-01", "--to", "2023-12-31", "--path", "log.txt", "--format", "adoc"};
 
         argumentsAnalyzer.argumentsAnalyze(args);
 

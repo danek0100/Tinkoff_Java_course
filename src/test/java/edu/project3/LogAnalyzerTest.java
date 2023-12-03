@@ -31,10 +31,11 @@ public class LogAnalyzerTest {
 
         logAnalyzer.analyzeLog(logSource);
 
-        assertEquals(1, logAnalyzer.statisticsInt.get("totalRequests"));
-        assertEquals(1, logAnalyzer.statisticsInt.get("totalResponseSize"));
+        assertEquals(1, logAnalyzer.statisticsInt.get(LogAnalyzer.TOTAL_REQUESTS));
+        assertEquals(1, logAnalyzer.statisticsInt.get(LogAnalyzer.TOTAL_RESPONSE_SIZE));
         assertEquals(1, logAnalyzer.statisticsCodeAnswers.get(304));
         assertEquals(1, logAnalyzer.statisticsRemoteAddress.get("93.180.71.3"));
+        assertEquals(1, logAnalyzer.statisticsInt.get(LogAnalyzer.MAX_REQUESTS_PER_MINUTE));
     }
 
     @Test
@@ -44,7 +45,7 @@ public class LogAnalyzerTest {
 
         logAnalyzer.updateStatistics(logRecord);
 
-        assertEquals(1, logAnalyzer.statisticsInt.get("totalRequests"));
+        assertEquals(1, logAnalyzer.statisticsInt.get(LogAnalyzer.TOTAL_REQUESTS));
         assertEquals(1, logAnalyzer.statisticsCodeAnswers.get(200));
         assertEquals(1, logAnalyzer.statisticsAgents.get("UserAgent"));
         assertEquals(1, logAnalyzer.statisticsRemoteAddress.get("127.0.0.1"));
@@ -66,6 +67,7 @@ public class LogAnalyzerTest {
         assertEquals(0, logAnalyzer.statisticsResources.size());
         assertEquals(0, logAnalyzer.statisticsAgents.size());
         assertEquals(0, logAnalyzer.statisticsRemoteAddress.size());
+        assertEquals(0, logAnalyzer.statisticsRequestsPerMinute.size());
     }
 
     @AfterEach

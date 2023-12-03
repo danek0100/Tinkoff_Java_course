@@ -12,7 +12,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
@@ -26,26 +28,31 @@ public class LogAnalyzer {
     public final Map<String, Long> statisticsResources = new HashMap<>();
     public final Map<String, Long> statisticsRemoteAddress = new HashMap<>();
     public final Map<String, Long> statisticsAgents = new HashMap<>();
+    public final Map<OffsetDateTime, Long> statisticsRequestsPerMinute = new HashMap<>();
 
-    private static final String TOTAL_REQUESTS = "totalRequests";
-    private static final String TOTAL_RESPONSE_SIZE = "totalResponseSize";
+    public static final String TOTAL_REQUESTS = "totalRequests";
+    public static final String TOTAL_RESPONSE_SIZE = "totalResponseSize";
+    public static final String AVERAGE_RESPONSE_SIZE = "averageResponseSize";
+    public static final String MAX_REQUESTS_PER_MINUTE = "maxRequestsPerMinute";
 
 
     public void analyzeLog(LogSource log) throws IOException, URISyntaxException, InterruptedException {
         if (log.type() == LogSource.LogType.PATH) {
-            parseLogsFromFile(Paths.get(log.path()));
+            analyzeLogsFromFile(Paths.get(log.path()));
         } else if (log.type() == LogSource.LogType.URI) {
-            parseLogsFromURL(new URI(log.path()));
+            List<LogRecord> records = parseLogsFromURL(new URI(log.path()));
+            records.forEach(this::updateStatistics);
         }
     }
 
-    public void parseLogsFromFile(Path filePath) throws IOException {
+    public void analyzeLogsFromFile(Path filePath) throws IOException {
+        // Используем ленивое чтение из файла
         try (var lines = Files.lines(filePath, StandardCharsets.UTF_8)) {
             lines.forEach(line -> updateStatistics(LogAnalyzer.parseLogEntry(line)));
         }
     }
 
-    public void parseLogsFromURL(URI url) throws IOException, InterruptedException {
+    public List<LogRecord> parseLogsFromURL(URI url) throws IOException, InterruptedException {
         try (HttpClient httpClient = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
@@ -54,9 +61,11 @@ public class LogAnalyzer {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
+            List<LogRecord> logRecords = new ArrayList<>();
             try (var lines = response.body().lines()) {
-                lines.forEach(line -> updateStatistics(parseLogEntry(line)));
+                lines.forEach(line -> logRecords.add(parseLogEntry(line)));
             }
+            return logRecords;
         }
     }
 
@@ -84,14 +93,18 @@ public class LogAnalyzer {
 
         updateCount(statisticsInt, TOTAL_REQUESTS);
         updateSum(statisticsInt, TOTAL_RESPONSE_SIZE, logRecord.bodyBytesSent());
-        updateAverage(statisticsInt,  TOTAL_RESPONSE_SIZE, "averageResponseSize", TOTAL_REQUESTS);
+        updateAverage(statisticsInt,  TOTAL_RESPONSE_SIZE, AVERAGE_RESPONSE_SIZE, TOTAL_REQUESTS);
 
         updateIntKeyCount(statisticsCodeAnswers, logRecord.status());
         updateCount(statisticsResources, logRecord.referer());
         updateCount(statisticsAgents, logRecord.userAgent());
         updateCount(statisticsRemoteAddress, logRecord.remoteAddr());
 
-        //TODO максимальное число запросов в минуту
+        OffsetDateTime timeRoundedToMinute = logRecord.timeLocal().withSecond(0).withNano(0);
+        statisticsRequestsPerMinute.put(timeRoundedToMinute,
+            statisticsRequestsPerMinute.getOrDefault(timeRoundedToMinute, 0L) + 1);
+
+        updateMaxRequestsPerMinute(statisticsRequestsPerMinute, statisticsInt, MAX_REQUESTS_PER_MINUTE);
     }
 
     private static void updateCount(Map<String, Long> statistics, String key) {
@@ -116,12 +129,21 @@ public class LogAnalyzer {
         intStatistics.put(averageKey, total / count);
     }
 
+    private static void updateMaxRequestsPerMinute(Map<OffsetDateTime, Long> statisticsRequestsPerMinute,
+        Map<String, Long> intStatistics, String key) {
+        long maxRequests = statisticsRequestsPerMinute.values().stream().max(Long::compare).orElse(0L);
+        if (maxRequests > intStatistics.getOrDefault(key, 0L)) {
+            intStatistics.put(key, maxRequests);
+        }
+    }
+
     public void clearStatistics() {
         statisticsAgents.clear();
         statisticsResources.clear();
         statisticsInt.clear();
         statisticsCodeAnswers.clear();
         statisticsRemoteAddress.clear();
+        statisticsRequestsPerMinute.clear();
     }
 
     public void setFrom(LocalDate from) {
