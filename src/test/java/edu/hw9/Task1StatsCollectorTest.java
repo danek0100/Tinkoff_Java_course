@@ -41,7 +41,7 @@ public class Task1StatsCollectorTest {
 
 
     @Test
-    public void testMultithreadedPushAndStats() throws InterruptedException {
+    public void testMultithreadedPushAndStats() {
         Task1StatsCollector collector = new Task1StatsCollector();
         int numberOfThreads = 6;
         try (ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads)) {
@@ -52,10 +52,9 @@ public class Task1StatsCollectorTest {
                 });
             }
         }
-        // Проверка агрегированных данных
+
         Map<String, Map<String, Double>> stats = collector.stats();
 
-        // Перебор метрик и проверка каждой
         for (Map.Entry<String, Map<String, Double>> entry : stats.entrySet()) {
             Map<String, Double> metricStats = entry.getValue();
 
