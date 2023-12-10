@@ -25,17 +25,8 @@ public class FractalFlameGenerator {
         Rect world = new Rect(-width / 2., -height / 2., width, height);
         FractalImage canvas = FractalImage.create(width, height);
 
-        List<Transformation> transformations = new ArrayList<>();
-        transformations.add(new LinearTransformation(1.0, 1.0, 50.0, 50.0));
-        transformations.add(new SinusoidalTransformation());
-        transformations.add(new DiskTransformation());
-        transformations.add(new PolarTransformation());
-        transformations.add(new SphericalTransformation());
-        transformations.add(new HeartTransformation());
-
-
         SingleRenderer renderer = new SingleRenderer(symmetry);
-        FractalImage renderedImage = renderer.render(canvas, world, transformations, samples, iterPerSample, seed);
+        FractalImage renderedImage = renderer.render(canvas, world, null, samples, iterPerSample, seed);
 
         ImageProcessor processor = new LogarithmicGammaCorrectionProcessor(2.2);
         processor.process(renderedImage);

@@ -4,6 +4,7 @@ import edu.project4.components.FractalImage;
 import edu.project4.components.Pixel;
 import edu.project4.components.Point;
 import edu.project4.components.Rect;
+import edu.project4.transformations.NonLinearTransformations;
 import edu.project4.transformations.Transformation;
 import java.util.List;
 import java.util.Random;
@@ -25,7 +26,12 @@ public class SingleRenderer implements Renderer {
             Point pw = randomPoint(world, random);
 
             for (short step = 0; step < iterPerSample; ++step) {
-                Transformation variation = variations.get(random.nextInt(variations.size()));
+                Transformation variation;
+                if (variations != null) {
+                    variation = variations.get(random.nextInt(variations.size()));
+                } else {
+                    variation = NonLinearTransformations.getRandomTransformation();
+                }
                 pw = variation.apply(pw);
 
                 for (int s = 0; s < symmetry; s++) {
@@ -89,9 +95,9 @@ public class SingleRenderer implements Renderer {
     private void updatePixel(FractalImage canvas, Pixel pixel, int x, int y) {
         int newHitCount = pixel.hitCount() + 1;
 
-        int newR = (newHitCount * 64) % 256;
-        int newG = (newHitCount * 128) % 256;
-        int newB = (newHitCount * 192) % 256;
+        int newR = (newHitCount) % 256;
+        int newG = (newHitCount * newHitCount) % 256;
+        int newB = (newHitCount * newHitCount * newHitCount) % 256;
 
         canvas.data()[y * canvas.width() + x] = new Pixel(newR, newG, newB, newHitCount);
     }
