@@ -1,6 +1,6 @@
 package edu.project4.transformations;
 
-import edu.project4.components.Point;;
+import edu.project4.components.Point;
 
 public class CylinderTransformation implements Transformation {
     @Override

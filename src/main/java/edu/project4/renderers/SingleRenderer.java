@@ -1,7 +1,7 @@
 package edu.project4.renderers;
 
 import edu.project4.components.Color;
-import edu.project4.components.FractalImage;
+import edu.project4.components.IFractalImage;
 import edu.project4.components.Pixel;
 import edu.project4.components.Point;
 import edu.project4.components.Rect;
@@ -10,17 +10,37 @@ import edu.project4.transformations.Transformation;
 import java.util.List;
 import java.util.Random;
 
+
+/**
+ * Renderer that performs single-threaded rendering of fractal images.
+ */
 public class SingleRenderer implements Renderer {
 
     private final int symmetry;
 
+    /**
+     * Constructs a SingleRenderer with the specified symmetry factor.
+     *
+     * @param symmetry The symmetry factor for fractal rendering.
+     */
     public SingleRenderer(int symmetry) {
         this.symmetry = symmetry;
     }
 
-
+    /**
+     * Renders a fractal image on the specified canvas within the given world coordinates using a single thread.
+     *
+     * @param canvas        The canvas to render the image on.
+     * @param world         The rectangular region in world coordinates to render.
+     * @param affine        The list of color transformations to apply.
+     * @param variations    The list of transformations to apply.
+     * @param samples       The number of samples per pixel.
+     * @param iterPerSample The number of iterations per sample.
+     * @param seed          The random seed for rendering.
+     * @return              The rendered fractal image.
+     */
     @Override
-    public FractalImage render(FractalImage canvas, Rect world, List<ColorTransformation> affine,
+    public IFractalImage render(IFractalImage canvas, Rect world, List<ColorTransformation> affine,
         List<Transformation> variations, int samples, int iterPerSample, int seed) {
         Random random = new Random(seed);
 
@@ -49,10 +69,10 @@ public class SingleRenderer implements Renderer {
         return canvas;
     }
 
-    private void applyChanges(FractalImage canvas, Rect world, Point pw, ColorTransformation chosenAffine) {
+    private void applyChanges(IFractalImage canvas, Rect world, Point pw, ColorTransformation chosenAffine) {
         if (world.contains(pw)) {
-            int canvasX = extension(canvas.width(), world.x(), world.x() + world.width(), pw.x());
-            int canvasY = extension(canvas.height(), world.y(), world.y() + world.height(), pw.y());
+            int canvasX = extension(canvas.getWidth(), world.x(), world.x() + world.width(), pw.x());
+            int canvasY = extension(canvas.getHeight(), world.y(), world.y() + world.height(), pw.y());
 
             if (canvas.contains(canvasX, canvasY)) {
                 updatePixel(canvas, chosenAffine, canvasX, canvasY);
@@ -61,7 +81,6 @@ public class SingleRenderer implements Renderer {
     }
 
     private Point randomPoint(Rect world, Random random) {
-
         double x = world.x() + (random.nextDouble() * world.width());
         double y = world.y() + (random.nextDouble() * world.height());
 
@@ -92,7 +111,7 @@ public class SingleRenderer implements Renderer {
         );
     }
 
-    private void updatePixel(FractalImage canvas, ColorTransformation colorTransformation, int x, int y) {
+    private void updatePixel(IFractalImage canvas, ColorTransformation colorTransformation, int x, int y) {
         Pixel oldPixel = canvas.pixel(x, y);
         Color newColor = mixColor(oldPixel.color(), colorTransformation.color());
         int newHitCount = oldPixel.hitCount() + 1;

@@ -1,15 +1,15 @@
 package edu.project4;
 
-
+import edu.project4.components.AffineTransformation;
 import edu.project4.components.Color;
 import edu.project4.components.FractalImage;
+import edu.project4.components.IFractalImage;
 import edu.project4.components.Rect;
+import edu.project4.components.SyncFractalImage;
 import edu.project4.config.Config;
-import edu.project4.config.PresetAffineTransformation;
 import edu.project4.processors.GammaCorrectionProcessor;
 import edu.project4.processors.ImageProcessor;
-import edu.project4.processors.LogarithmicGammaCorrectionProcessor;
-import edu.project4.renderers.MultiRenderer;
+import edu.project4.renderers.ParallelRenderer;
 import edu.project4.renderers.Renderer;
 import edu.project4.renderers.SingleRenderer;
 import edu.project4.transformations.ColorTransformation;
@@ -20,30 +20,45 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+
+/**
+ * This class generates and saves fractal flame images based on the provided configuration.
+ */
 public class FractalFlameGenerator {
+
+    private final static Logger LOGGER = LogManager.getLogger();
 
     private FractalFlameGenerator() {
     }
 
-    public static void generateAndSaveFractal(Config config) {
-        validate(config);
 
+    /**
+     * Generate and save a fractal flame image based on the provided configuration.
+     *
+     * @param config The configuration specifying the parameters of the fractal flame generation.
+     */
+    public static void generateAndSaveFractal(Config config) {
         List<ColorTransformation> affine = prepareAffine(
             config.getRandomAffineTransformationsCount(),
             config.getPresetAffineTransformations()
         );
 
         Renderer renderer;
+        IFractalImage imageBase;
 
         if (config.getThreadsCount() <= 1) {
             renderer = new SingleRenderer(config.getSymmetry());
+            imageBase = FractalImage.create(config.getWidth(), config.getHeight());
         } else {
-            renderer = new MultiRenderer(config.getThreadsCount(), config.getSymmetry());
+            renderer = new ParallelRenderer(config.getThreadsCount(), config.getSymmetry());
+            imageBase = SyncFractalImage.create(config.getWidth(), config.getHeight());
         }
 
-        FractalImage fractalImage = renderer.render(
-            FractalImage.create(config.getWidth(), config.getHeight()),
+        IFractalImage fractalImage = renderer.render(
+            imageBase,
             new Rect(
                 config.getMinX(), config.getMinY(),
                 config.getMaxX() - config.getMinX(), config.getMaxY() - config.getMinY()),
@@ -66,11 +81,13 @@ public class FractalFlameGenerator {
                     config.getFilename() + "." + config.getFileType().toString().toLowerCase()),
                 config.getFileType()
             );
-        } catch (IOException ignored) {} // TODO
+        } catch (IOException exception) {
+            LOGGER.error(exception);
+        }
     }
 
 
-    private static List<ColorTransformation> prepareAffine(int randomCount, PresetAffineTransformation[] preset) {
+    private static List<ColorTransformation> prepareAffine(int randomCount, AffineTransformation[] preset) {
         List<ColorTransformation> affine = new ArrayList<>();
 
         for (int i = 0; i < randomCount; i++) {
@@ -81,57 +98,19 @@ public class FractalFlameGenerator {
         }
 
         if (preset != null) {
-            for (PresetAffineTransformation presetObj : preset) {
+            for (AffineTransformation presetObj : preset) {
                 affine.add(new ColorTransformation(
                     new LinearTransformation(
-                        presetObj.getA(), presetObj.getB(), presetObj.getC(),
-                        presetObj.getD(), presetObj.getE(), presetObj.getF()
+                        presetObj.a(), presetObj.b(), presetObj.c(),
+                        presetObj.d(), presetObj.e(), presetObj.f()
                     ),
                     new Color(
-                        presetObj.getRed(), presetObj.getGreen(), presetObj.getBlue()
+                        presetObj.red(), presetObj.green(), presetObj.blue()
                     )
                 ));
             }
         }
 
         return affine;
-    }
-
-    private static void validate(Config config) {
-        if (config.getWidth() <= 0) {
-            throw new IllegalArgumentException("Неверная ширина изображения");
-        }
-
-        if (config.getHeight() <= 0) {
-            throw new IllegalArgumentException("Неверная высота изображения");
-        }
-
-        if (config.getThreadsCount() <= 0) {
-            throw new IllegalArgumentException("Неверное количество потоков");
-        }
-
-        if (config.getSamples() <= 0) {
-            throw new IllegalArgumentException("Неверное количество повторений");
-        }
-
-        if (config.getIterations() <= 0) {
-            throw new IllegalArgumentException("Неверное количество итераций");
-        }
-
-        if (config.getRandomAffineTransformationsCount() <= 0) {
-            throw new IllegalArgumentException("Неверное количество случайных преобразований");
-        }
-
-        if (config.getRandomAffineTransformationsCount() == 0 && config.getPresetAffineTransformations().length == 0) {
-            throw new IllegalArgumentException("Отсутствуют линейные преобразования");
-        }
-
-        if (config.getNonlinearTransformations().length == 0) {
-            throw new IllegalArgumentException("Отсутствуют нелинейные преобразования");
-        }
-
-        if (config.getDirectory() == null) {
-            throw new IllegalArgumentException("Отсутствует путь для сохранения файла");
-        }
     }
 }

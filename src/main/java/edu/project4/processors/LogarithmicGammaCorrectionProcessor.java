@@ -1,22 +1,37 @@
 package edu.project4.processors;
 
 import edu.project4.components.Color;
-import edu.project4.components.FractalImage;
+import edu.project4.components.IFractalImage;
 import edu.project4.components.Pixel;
 
+/**
+ * Image processor for applying logarithmic gamma correction to a fractal image.
+ */
 public class LogarithmicGammaCorrectionProcessor implements ImageProcessor {
 
     private final double gamma;
+    private static final int BOARDER = 255;
+    private static final int CORR = 8;
 
+    /**
+     * Constructs a LogarithmicGammaCorrectionProcessor with the specified gamma correction factor.
+     *
+     * @param gamma The gamma correction factor to be applied to the image.
+     */
     public LogarithmicGammaCorrectionProcessor(double gamma) {
         this.gamma = gamma;
     }
 
+    /**
+     * Apply logarithmic gamma correction to the given fractal image.
+     *
+     * @param image The fractal image to be processed.
+     */
     @Override
-    public void process(FractalImage image) {
-        for (int i = 0; i < image.data().length; i++) {
-            Pixel pixel = image.data()[i];
-            image.data()[i] = applyGammaCorrection(pixel);
+    public void process(IFractalImage image) {
+        for (int i = 0; i < image.getData().length; i++) {
+            Pixel pixel = image.getData()[i];
+            image.getData()[i] = applyGammaCorrection(pixel);
         }
     }
 
@@ -25,19 +40,18 @@ public class LogarithmicGammaCorrectionProcessor implements ImageProcessor {
         double correctedG = Math.max(pixel.color().g(), 1);
         double correctedB = Math.max(pixel.color().b(), 1);
 
-        double newR = 255 * Math.log(correctedR) / Math.log(1 << 8);
-        double newG = 255 * Math.log(correctedG) / Math.log(1 << 8);
-        double newB = 255 * Math.log(correctedB) / Math.log(1 << 8);
+        double newR = BOARDER * Math.log(correctedR) / Math.log(1 << CORR);
+        double newG = BOARDER * Math.log(correctedG) / Math.log(1 << CORR);
+        double newB = BOARDER * Math.log(correctedB) / Math.log(1 << CORR);
 
-        newR = Math.pow(newR / 255, gamma) * 255;
-        newG = Math.pow(newG / 255, gamma) * 255;
-        newB = Math.pow(newB / 255, gamma) * 255;
+        newR = Math.pow(newR / BOARDER, gamma) * BOARDER;
+        newG = Math.pow(newG / BOARDER, gamma) * BOARDER;
+        newB = Math.pow(newB / BOARDER, gamma) * BOARDER;
 
-        int finalR = (int) Math.min(255, Math.max(0, newR));
-        int finalG = (int) Math.min(255, Math.max(0, newG));
-        int finalB = (int) Math.min(255, Math.max(0, newB));
+        int finalR = (int) Math.min(BOARDER, Math.max(0, newR));
+        int finalG = (int) Math.min(BOARDER, Math.max(0, newG));
+        int finalB = (int) Math.min(BOARDER, Math.max(0, newB));
 
         return new Pixel(new Color(finalR, finalG, finalB), pixel.hitCount());
     }
-
 }

@@ -1,34 +1,37 @@
 package edu.project4.config;
 
-import edu.project4.ImageFormat;
-import edu.project4.transformations.Transformation;
+import edu.project4.components.AffineTransformation;
 import edu.project4.transformations.NonLinearTransformations;
-import java.time.LocalDateTime;
+import edu.project4.transformations.Transformation;
+import edu.project4.utils.ImageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@SuppressWarnings("checkstyle:MagicNumber")
+
+/**
+ * Configuration class that holds various parameters and settings for fractal image generation.
+ */
 public class Config {
-    private int height = 1080;
-    private int width = 1920;
-    private double minX = -1.77;
-    private double maxX = 1.77;
-    private double minY = -1;
-    private double maxY = 1;
-    private int threadsCount = 1;
-    private int symmetry = 1;
-    private int samples = 30;
-    private int iterations = 100_000;
-    private int randomAffineTransformationsCount = 5;
-    private ImageFormat fileType = ImageFormat.BMP;
-    private boolean withCorrection = true;
-    private PresetAffineTransformation[] presetAffineTransformations;
-    private String directory = "./";
-    private String filename = LocalDateTime.now().toString();
+    private int height;
+    private int width;
+    private double minX;
+    private double maxX;
+    private double minY;
+    private double maxY;
+    private int threadsCount;
+    private int symmetry;
+    private int samples;
+    private int iterations;
+    private int randomAffineTransformationsCount;
+    private ImageFormat fileType;
+    private boolean withCorrection;
+    private AffineTransformation[] affineTransformations;
+    private String directory;
+    private String filename;
     private Transformation[] nonlinearTransformations;
-    private double gamma = 2.2;
-    private int seed = 42;
+    private double gamma;
+    private int seed;
 
     public int getHeight() {
         return height;
@@ -134,12 +137,12 @@ public class Config {
         this.withCorrection = withCorrection;
     }
 
-    public PresetAffineTransformation[] getPresetAffineTransformations() {
-        return presetAffineTransformations;
+    public AffineTransformation[] getPresetAffineTransformations() {
+        return affineTransformations;
     }
 
-    public void setPresetAffineTransformations(PresetAffineTransformation[] presetAffineTransformations) {
-        this.presetAffineTransformations = presetAffineTransformations;
+    public void setPresetAffineTransformations(AffineTransformation[] affineTransformations) {
+        this.affineTransformations = affineTransformations;
     }
 
     public Transformation[] getNonlinearTransformations() {
@@ -194,6 +197,31 @@ public class Config {
         this.seed = seed;
     }
 
+
+    /**
+     * Constructs a Config object with the specified parameters.
+     *
+     * @param height                      The height of the image.
+     * @param width                       The width of the image.
+     * @param minX                        The minimum x-coordinate.
+     * @param maxX                        The maximum x-coordinate.
+     * @param minY                        The minimum y-coordinate.
+     * @param maxY                        The maximum y-coordinate.
+     * @param threadsCount                The number of threads to use for image generation.
+     * @param symmetry                    The symmetry factor for fractal generation.
+     * @param samples                     The number of samples per pixel.
+     * @param iterations                  The number of iterations for fractal generation.
+     * @param randomAffineTransformationsCount The count of random affine transformations.
+     * @param fileType                    The image file format (e.g., PNG, JPEG).
+     * @param withCorrection              Whether to apply color correction.
+     * @param affineTransformations        An array of preset affine transformations.
+     * @param directory                   The directory to save the generated image.
+     * @param filename                    The name of the generated image file.
+     * @param nonlinearTransformations    An array of selected nonlinear transformations.
+     * @param gamma                       The gamma correction factor for color.
+     * @param seed                        The random seed for image generation.
+     */
+    @SuppressWarnings("ParameterNumber")
     public Config(
         int height,
         int width,
@@ -208,7 +236,7 @@ public class Config {
         int randomAffineTransformationsCount,
         ImageFormat fileType,
         boolean withCorrection,
-        PresetAffineTransformation[] presetAffineTransformations,
+        AffineTransformation[] affineTransformations,
         String directory,
         String filename,
         Transformation[] nonlinearTransformations,
@@ -228,7 +256,7 @@ public class Config {
         this.randomAffineTransformationsCount = randomAffineTransformationsCount;
         this.fileType = fileType;
         this.withCorrection = withCorrection;
-        this.presetAffineTransformations = presetAffineTransformations;
+        this.affineTransformations = affineTransformations;
         this.directory = directory;
         this.filename = filename;
         this.nonlinearTransformations = nonlinearTransformations;
