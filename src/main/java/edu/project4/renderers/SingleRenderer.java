@@ -22,8 +22,8 @@ public class SingleRenderer implements Renderer {
 
     @Override
     public FractalImage render(FractalImage canvas, Rect world, List<ColorTransformation> affine,
-        List<Transformation> variations, int samples, int iterPerSample) {
-        Random random = ThreadLocalRandom.current();
+        List<Transformation> variations, int samples, int iterPerSample, int seed) {
+        Random random = new Random(seed);
 
         for (int i = 0; i < samples; i++) {
             Point pw = randomPoint(world, random);

@@ -48,7 +48,8 @@ public class FractalFlameGenerator {
             affine,
             Arrays.stream(config.getNonlinearTransformations()).toList(),
             config.getSamples(),
-            config.getIterations()
+            config.getIterations(),
+            config.getSeed()
         );
 
         if (config.isWithCorrection()) {

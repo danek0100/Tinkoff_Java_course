@@ -28,6 +28,7 @@ public class Config {
     private String filename = LocalDateTime.now().toString();
     private Transformation[] nonlinearTransformations;
     private double gamma = 2.2;
+    private int seed = 42;
 
     public int getHeight() {
         return height;
@@ -185,6 +186,14 @@ public class Config {
         this.gamma = gamma;
     }
 
+    public int getSeed() {
+        return seed;
+    }
+
+    public void setSeed(int seed) {
+        this.seed = seed;
+    }
+
     public Config(
         int height,
         int width,
@@ -203,7 +212,8 @@ public class Config {
         String directory,
         String filename,
         Transformation[] nonlinearTransformations,
-        double gamma
+        double gamma,
+        int seed
     ) {
         this.height = height;
         this.width = width;
@@ -223,5 +233,6 @@ public class Config {
         this.filename = filename;
         this.nonlinearTransformations = nonlinearTransformations;
         this.gamma = gamma;
+        this.seed = seed;
     }
 }

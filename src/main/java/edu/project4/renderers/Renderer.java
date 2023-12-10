@@ -13,6 +13,7 @@ public interface Renderer {
         List<ColorTransformation> affine,
         List<Transformation> variations,
         int samples,
-        int iterPerSample
+        int iterPerSample,
+        int seed
     );
 }
