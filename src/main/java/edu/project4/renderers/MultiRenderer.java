@@ -1,20 +1,18 @@
 package edu.project4.renderers;
 
-import edu.project4.components.Color;
-import edu.project4.components.FractalImage;
-import edu.project4.components.Pixel;
-import edu.project4.components.Point;
-import edu.project4.components.Rect;
+import edu.project4.components.*;
 import edu.project4.transformations.ColorTransformation;
 import edu.project4.transformations.Transformation;
 import java.util.List;
 import java.util.Random;
 
-public class SingleRenderer implements Renderer {
+public class MultiRenderer implements Renderer {
 
     private final int symmetry;
+    private final int threadCount;
 
-    public SingleRenderer(int symmetry) {
+    public MultiRenderer(int threadCount, int symmetry) {
+        this.threadCount = threadCount;
         this.symmetry = symmetry;
     }
 

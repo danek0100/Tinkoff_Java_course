@@ -6,8 +6,10 @@ import edu.project4.components.FractalImage;
 import edu.project4.components.Rect;
 import edu.project4.config.Config;
 import edu.project4.config.PresetAffineTransformation;
+import edu.project4.processors.GammaCorrectionProcessor;
 import edu.project4.processors.ImageProcessor;
 import edu.project4.processors.LogarithmicGammaCorrectionProcessor;
+import edu.project4.renderers.MultiRenderer;
 import edu.project4.renderers.Renderer;
 import edu.project4.renderers.SingleRenderer;
 import edu.project4.transformations.ColorTransformation;
@@ -37,14 +39,14 @@ public class FractalFlameGenerator {
         if (config.getThreadsCount() <= 1) {
             renderer = new SingleRenderer(config.getSymmetry());
         } else {
-            //renderer = new MultithreadedRenderer(configObject.getThreadsCount());
-            return;
+            renderer = new MultiRenderer(config.getThreadsCount(), config.getSymmetry());
         }
 
         FractalImage fractalImage = renderer.render(
             FractalImage.create(config.getWidth(), config.getHeight()),
-            new Rect(-config.getWidth() / 2., -config.getHeight() / 2.,
-                config.getWidth(), config.getHeight()),
+            new Rect(
+                config.getMinX(), config.getMinY(),
+                config.getMaxX() - config.getMinX(), config.getMaxY() - config.getMinY()),
             affine,
             Arrays.stream(config.getNonlinearTransformations()).toList(),
             config.getSamples(),
@@ -53,7 +55,7 @@ public class FractalFlameGenerator {
         );
 
         if (config.isWithCorrection()) {
-            ImageProcessor processor = new LogarithmicGammaCorrectionProcessor(config.getGamma());
+            ImageProcessor processor = new GammaCorrectionProcessor(config.getGamma());
             processor.process(fractalImage);
         }
 

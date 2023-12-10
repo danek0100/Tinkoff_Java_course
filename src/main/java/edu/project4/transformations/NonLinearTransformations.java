@@ -14,7 +14,8 @@ public enum NonLinearTransformations {
     POLAR(new PolarTransformation()),
     SPHERICAL(new SphericalTransformation()),
     SPIRAL(new SpiralTransformation()),
-    SWIRL(new SwirlTransformation());
+    SWIRL(new SwirlTransformation()),
+    SINUSOIDAL(new SinusoidalTransformation());
 
     private final Transformation transformation;
 
