@@ -25,7 +25,7 @@ public final class ImageUtils {
         for (int y = 0; y < fractalImage.height(); y++) {
             for (int x = 0; x < fractalImage.width(); x++) {
                 Pixel pixel = fractalImage.pixel(x, y);
-                int color = (pixel.r() << 16) | (pixel.g() << 8) | pixel.b();
+                int color = (pixel.color().r() << 16) | (pixel.color().g() << 8) | pixel.color().b();
                 bufferedImage.setRGB(x, y, color);
             }
         }

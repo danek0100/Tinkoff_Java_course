@@ -1,13 +1,15 @@
 package edu.project4.renderers;
 
+import edu.project4.components.Color;
 import edu.project4.components.FractalImage;
 import edu.project4.components.Pixel;
 import edu.project4.components.Point;
 import edu.project4.components.Rect;
-import edu.project4.transformations.NonLinearTransformations;
+import edu.project4.transformations.ColorTransformation;
 import edu.project4.transformations.Transformation;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SingleRenderer implements Renderer {
 
@@ -17,38 +19,31 @@ public class SingleRenderer implements Renderer {
         this.symmetry = symmetry;
     }
 
-    @Override
-    public FractalImage render(FractalImage canvas, Rect world, List<Transformation> variations,
-        int samples, short iterPerSample, long seed) {
-        Random random = new Random(seed);
 
-        for (int num = 0; num < samples; ++num) {
+    @Override
+    public FractalImage render(FractalImage canvas, Rect world, List<ColorTransformation> affine,
+        List<Transformation> variations, int samples, int iterPerSample) {
+        Random random = ThreadLocalRandom.current();
+
+        for (int i = 0; i < samples; i++) {
             Point pw = randomPoint(world, random);
+            System.out.println(i);
 
             for (short step = 0; step < iterPerSample; ++step) {
-                Transformation variation;
-                if (variations != null) {
-                    variation = variations.get(random.nextInt(variations.size()));
-                } else {
-                    variation = NonLinearTransformations.getRandomTransformation();
-                }
-                pw = variation.apply(pw);
+                ColorTransformation chosenAffine = affine.get(random.nextInt(affine.size()));
+                Transformation variation = variations.get(random.nextInt(variations.size()));
 
-                for (int s = 0; s < symmetry; s++) {
-                    double theta2 = Math.PI * 2 / symmetry * s;
-                    Point pwr = rotate(pw, theta2);
-                    if (!world.contains(pwr)) continue;
+                pw = variation.apply(chosenAffine.transformation().apply(pw));
 
-                    Pixel pixel = mapRangeToPixel(world, pwr, canvas);
-                    if (pixel == null) continue;
+                if (symmetry > 0) {
+                    for (int s = 0; s < symmetry; s++) {
+                        double theta = Math.PI * 2 / symmetry * s;
+                        Point pwr = rotate(pw, theta);
 
-                    int canvasX = (int) ((pwr.x() - world.x()) / world.width() * canvas.width());
-                    int canvasY = (int) ((pwr.y() - world.y()) / world.height() * canvas.height());
-
-                    if (canvas.contains(canvasX, canvasY)) {
-                        updatePixel(canvas, pixel, canvasX, canvasY);
+                        applyChanges(canvas, world, pwr, chosenAffine);
                     }
-
+                } else {
+                    applyChanges(canvas, world, pw, chosenAffine);
                 }
             }
         }
@@ -56,9 +51,22 @@ public class SingleRenderer implements Renderer {
         return canvas;
     }
 
+    private void applyChanges(FractalImage canvas, Rect world, Point pw, ColorTransformation chosenAffine) {
+        if (world.contains(pw)) {
+            int canvasX = extension(canvas.width(), world.x(), world.x() + world.width(), pw.x());
+            int canvasY = extension(canvas.height(), world.y(), world.y() + world.height(), pw.y());
+
+            if (canvas.contains(canvasX, canvasY)) {
+                updatePixel(canvas, chosenAffine, canvasX, canvasY);
+            }
+        }
+    }
+
     private Point randomPoint(Rect world, Random random) {
-        double x = world.x() + random.nextDouble() * world.width();
-        double y = world.y() + random.nextDouble() * world.height();
+
+        double x = world.x() + (random.nextDouble() * world.width());
+        double y = world.y() + (random.nextDouble() * world.height());
+
         return new Point(x, y);
     }
 
@@ -72,35 +80,23 @@ public class SingleRenderer implements Renderer {
         return new Point(newX, newY);
     }
 
-
-    private Pixel mapRangeToPixel(Rect world, Point point, FractalImage canvas) {
-        int canvasX = (int) Math.round((point.x() - world.x()) / world.width() * canvas.width());
-        int canvasY = (int) Math.round((point.y() - world.y()) / world.height() * canvas.height());
-
-        if (canvasX == canvas.width()) {
-            canvasX -= 1;
-        }
-        if (canvasY == canvas.height()) {
-            canvasY -= 1;
-        }
-
-        if (canvas.contains(canvasX, canvasY)) {
-            return canvas.pixel(canvasX, canvasY);
-        }
-
-        return null;
+    private Color mixColor(Color first, Color second) {
+        return new Color(
+            (first.r() + second.r()) / 2,
+            (first.g() + second.g()) / 2,
+            (first.b() + second.b()) / 2
+        );
     }
 
-
-    private void updatePixel(FractalImage canvas, Pixel pixel, int x, int y) {
-        int newHitCount = pixel.hitCount() + 1;
-
-        int newR = (newHitCount) % 256;
-        int newG = (newHitCount * newHitCount) % 256;
-        int newB = (newHitCount * newHitCount * newHitCount) % 256;
-
-        canvas.data()[y * canvas.width() + x] = new Pixel(newR, newG, newB, newHitCount);
+    private int extension(int size, double min, double max, double point) {
+        double ratio = (point - min) / (max - min);
+        return (int)(ratio * size);
     }
 
-
+    private void updatePixel(FractalImage canvas, ColorTransformation colorTransformation, int x, int y) {
+        Pixel oldPixel = canvas.pixel(x, y);
+        Color newColor = mixColor(oldPixel.color(), colorTransformation.color());
+        int newHitCount = oldPixel.hitCount() + 1;
+        canvas.updatePixel(x, y, new Pixel(newColor, newHitCount));
+    }
 }

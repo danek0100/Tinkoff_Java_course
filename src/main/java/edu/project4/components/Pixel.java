@@ -1,4 +1,4 @@
 package edu.project4.components;
 
-public record Pixel(int r, int g, int b, int hitCount) {
+public record Pixel(Color color, int hitCount) {
 }

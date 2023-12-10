@@ -1,5 +1,6 @@
 package edu.project4.processors;
 
+import edu.project4.components.Color;
 import edu.project4.components.FractalImage;
 import edu.project4.components.Pixel;
 
@@ -20,9 +21,9 @@ public class LogarithmicGammaCorrectionProcessor implements ImageProcessor {
     }
 
     private Pixel applyGammaCorrection(Pixel pixel) {
-        double correctedR = Math.max(pixel.r(), 1);
-        double correctedG = Math.max(pixel.g(), 1);
-        double correctedB = Math.max(pixel.b(), 1);
+        double correctedR = Math.max(pixel.color().r(), 1);
+        double correctedG = Math.max(pixel.color().g(), 1);
+        double correctedB = Math.max(pixel.color().b(), 1);
 
         double newR = 255 * Math.log(correctedR) / Math.log(1 << 8);
         double newG = 255 * Math.log(correctedG) / Math.log(1 << 8);
@@ -36,7 +37,7 @@ public class LogarithmicGammaCorrectionProcessor implements ImageProcessor {
         int finalG = (int) Math.min(255, Math.max(0, newG));
         int finalB = (int) Math.min(255, Math.max(0, newB));
 
-        return new Pixel(finalR, finalG, finalB, pixel.hitCount());
+        return new Pixel(new Color(finalR, finalG, finalB), pixel.hitCount());
     }
 
 }

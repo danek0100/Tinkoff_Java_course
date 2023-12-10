@@ -5,7 +5,7 @@ public record FractalImage(Pixel[] data, int width, int height) {
     public static FractalImage create(int width, int height) {
         Pixel[] data = new Pixel[width * height];
         for (int i = 0; i < data.length; i++) {
-            data[i] = new Pixel(0, 0, 0, 0);
+            data[i] = new Pixel(new Color(0, 0, 0), 0);
         }
         return new FractalImage(data, width, height);
     }
@@ -19,5 +19,11 @@ public record FractalImage(Pixel[] data, int width, int height) {
             return data[y * width + x];
         }
         return null;
+    }
+
+    public void updatePixel(int x, int y, Pixel newPixel) {
+        if (contains(x, y)) {
+            data[y * width + x] = newPixel;
+        }
     }
 }

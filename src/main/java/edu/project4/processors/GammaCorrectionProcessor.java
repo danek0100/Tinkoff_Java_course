@@ -1,5 +1,6 @@
 package edu.project4.processors;
 
+import edu.project4.components.Color;
 import edu.project4.components.FractalImage;
 import edu.project4.components.Pixel;
 
@@ -20,10 +21,10 @@ public class GammaCorrectionProcessor implements ImageProcessor {
     }
 
     private Pixel applyGammaCorrection(Pixel pixel) {
-        int r = (int)(255 * Math.pow((double)pixel.r() / 255, gamma));
-        int g = (int)(255 * Math.pow((double)pixel.g() / 255, gamma));
-        int b = (int)(255 * Math.pow((double)pixel.b() / 255, gamma));
+        int r = (int)(255 * Math.pow((double)pixel.color().r() / 255, gamma));
+        int g = (int)(255 * Math.pow((double)pixel.color().g() / 255, gamma));
+        int b = (int)(255 * Math.pow((double)pixel.color().b() / 255, gamma));
 
-        return new Pixel(r, g, b, pixel.hitCount());
+        return new Pixel(new Color(r, g, b), pixel.hitCount());
     }
 }
