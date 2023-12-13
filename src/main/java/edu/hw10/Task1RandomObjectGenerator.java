@@ -1,6 +1,8 @@
 package edu.hw10;
 
-
+import edu.hw10.annotation.Max;
+import edu.hw10.annotation.Min;
+import edu.hw10.annotation.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -14,9 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import edu.hw10.annotation.Max;
-import edu.hw10.annotation.Min;
-import edu.hw10.annotation.NotNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,8 +26,11 @@ import org.apache.logging.log4j.Logger;
  * This generator can create objects using accessible constructors, factory methods, or default constructors.
  */
  public class Task1RandomObjectGenerator {
+
     private final static Logger LOGGER = LogManager.getLogger();
     private final Map<Class<?>, List<Constructor<?>>> constructorsCache = new HashMap<>();
+    private static final int A = 97;
+    private static final int Z = 122;
 
     /**
      * Generates a random object of the specified class.
@@ -87,7 +89,8 @@ import org.apache.logging.log4j.Logger;
             }
 
             return clazz.cast(instance);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | UnsupportedOperationException exception) {
+        } catch (InstantiationException | IllegalAccessException
+                 | InvocationTargetException | UnsupportedOperationException exception) {
             LOGGER.error("Error instantiating class {}: {}", clazz.getName(), exception.getMessage());
             throw new ReflectiveOperationException(exception);
         }
@@ -137,9 +140,9 @@ import org.apache.logging.log4j.Logger;
         for (Method method : clazz.getDeclaredMethods()) {
             int modifiers = method.getModifiers();
 
-            if (Modifier.isStatic(modifiers) &&
-                method.getName().equals(factoryMethodName) &&
-                method.getReturnType().isAssignableFrom(clazz)) {
+            if (Modifier.isStatic(modifiers)
+                && method.getName().equals(factoryMethodName)
+                && method.getReturnType().isAssignableFrom(clazz)) {
                 factoryMethods.add(method);
             }
         }
@@ -178,11 +181,12 @@ import org.apache.logging.log4j.Logger;
             Object result = selectedMethod.invoke(null, paramValues);
 
             if (!clazz.isInstance(result)) {
-                throw new ClassCastException("Factory method " + factoryMethodName + " did not return the correct type");
+                throw new ClassCastException("Factory method "
+                    + factoryMethodName + " did not return the correct type");
             }
 
             return clazz.cast(result);
-        } catch (IllegalAccessException | InvocationTargetException | UnsupportedOperationException e ) {
+        } catch (IllegalAccessException | InvocationTargetException | UnsupportedOperationException e) {
             throw new ReflectiveOperationException("Error invoking factory method: " + factoryMethodName, e);
         }
     }
@@ -192,8 +196,8 @@ import org.apache.logging.log4j.Logger;
         T instance = constructor.newInstance();
 
         for (Field field : clazz.getDeclaredFields()) {
-            if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
-                java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
+            if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                || java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
                 continue;
             }
 
@@ -215,6 +219,7 @@ import org.apache.logging.log4j.Logger;
     }
 
 
+    @SuppressWarnings("MagicNumber")
     private Object generateRandomValueWithAnnotations(Class<?> type, NotNull notNull, Min min, Max max) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         Object value;
@@ -246,6 +251,7 @@ import org.apache.logging.log4j.Logger;
         return value;
     }
 
+    @SuppressWarnings({"ReturnCount", "CyclomaticComplexity"})
     private Object generateRandomNumberWithinRange(Class<?> type, Min min, Max max, ThreadLocalRandom random) {
         if (type.equals(int.class) || type.equals(Integer.class)) {
             return random.nextInt((min != null) ? (int) min.value() : Integer.MIN_VALUE,
@@ -257,7 +263,8 @@ import org.apache.logging.log4j.Logger;
             return random.nextDouble((min != null) ? min.value() : Double.MIN_VALUE,
                 (max != null) ? max.value() : Double.MAX_VALUE);
         } else if (type.equals(float.class) || type.equals(Float.class)) {
-            return random.nextFloat() * ((max != null) ? (float) max.value() - ((min != null) ? (float) min.value() : Float.MIN_VALUE) : Float.MAX_VALUE)
+            return random.nextFloat() * ((max != null) ? (float) max.value() - ((min != null) ? (float) min.value()
+                : Float.MIN_VALUE) : Float.MAX_VALUE)
                 + ((min != null) ? (float) min.value() : Float.MIN_VALUE);
         }
         return null;
@@ -265,14 +272,12 @@ import org.apache.logging.log4j.Logger;
 
 
     private String generateRandomString(Min min, Max max, ThreadLocalRandom random) {
-        int leftLimit = 97; // ASCII code for 'a'
-        int rightLimit = 122; // ASCII code for 'z'
         int targetStringLength = ThreadLocalRandom.current().nextInt(
             random.nextInt((min != null) ? (int) min.value() : Integer.MIN_VALUE,
             (max != null) ? (int) max.value() + 1 : Integer.MAX_VALUE)
         );
 
-        return random.ints(leftLimit, rightLimit + 1)
+        return random.ints(A, Z + 1)
             .limit(targetStringLength)
             .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
             .toString();

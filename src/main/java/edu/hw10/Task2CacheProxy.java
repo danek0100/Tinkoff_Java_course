@@ -1,14 +1,25 @@
 package edu.hw10;
 
 import edu.hw10.annotation.Cache;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.Proxy;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import java.io.*;
-import java.lang.reflect.*;
-import java.nio.file.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.Stream;
+
 
 
 /**
@@ -18,14 +29,14 @@ import java.util.stream.Stream;
 public class Task2CacheProxy {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Map<String, Object> cache = new ConcurrentHashMap<>();
-    private static final Map<String, Long> timeMap = new ConcurrentHashMap<>();
-    private static final Queue<String> accessQueue = new ConcurrentLinkedQueue<>();
-    static final String cacheDir = System.getProperty("java.io.tmpdir") + "/cacheDir";
+    private static final Map<String, Object> CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, Long> TIME_MAP = new ConcurrentHashMap<>();
+    private static final Queue<String> ACCESS_QUEUE = new ConcurrentLinkedQueue<>();
+    static final String CACHE_DIR = System.getProperty("java.io.tmpdir") + "/cacheDir";
 
     static {
         try {
-            Files.createDirectories(Paths.get(cacheDir));
+            Files.createDirectories(Paths.get(CACHE_DIR));
         } catch (IOException e) {
             throw new RuntimeException("Failed to create cache directory", e);
         }
@@ -48,30 +59,31 @@ public class Task2CacheProxy {
             (proxy, method, args) -> {
                 Cache cacheAnnotation = method.getAnnotation(Cache.class);
                 if (cacheAnnotation != null) {
-                    String cacheName = cacheAnnotation.cacheName().isEmpty() ? method.getName() : cacheAnnotation.cacheName();
+                    String cacheName = cacheAnnotation.cacheName().isEmpty() ? method.getName()
+                        : cacheAnnotation.cacheName();
                     String key = cacheName + Arrays.toString(args);
 
                     synchronized (Task2CacheProxy.class) {
-                        if (cache.containsKey(key)) {
+                        if (CACHE.containsKey(key)) {
                             updateAccessData(key);
-                            return cache.get(key);
+                            return CACHE.get(key);
                         }
 
-                        if (cache.size() >= cacheAnnotation.maxSize()) {
+                        if (CACHE.size() >= cacheAnnotation.maxSize()) {
                             evictCache(cacheAnnotation.strategy());
                         }
 
                         if (cacheAnnotation.persist()) {
                             Object diskResult = loadFromDisk(key);
                             if (diskResult != null) {
-                                cache.put(key, diskResult);
+                                CACHE.put(key, diskResult);
                                 updateAccessData(key);
                                 return diskResult;
                             }
                         }
 
                         Object result = method.invoke(target, args);
-                        cache.put(key, result);
+                        CACHE.put(key, result);
                         updateAccessData(key);
 
                         if (cacheAnnotation.persist()) {
@@ -87,17 +99,17 @@ public class Task2CacheProxy {
     }
 
     private static void updateAccessData(String key) {
-        timeMap.put(key, System.currentTimeMillis());
-        accessQueue.remove(key);
-        accessQueue.offer(key);
+        TIME_MAP.put(key, System.currentTimeMillis());
+        ACCESS_QUEUE.remove(key);
+        ACCESS_QUEUE.offer(key);
     }
 
     private static void evictCache(String strategy) {
         if ("LRU".equals(strategy)) {
-            String lruKey = Collections.min(timeMap.entrySet(), Map.Entry.comparingByValue()).getKey();
+            String lruKey = Collections.min(TIME_MAP.entrySet(), Map.Entry.comparingByValue()).getKey();
             removeCacheEntry(lruKey);
         } else if ("FIFO".equals(strategy)) {
-            String fifoKey = accessQueue.poll();
+            String fifoKey = ACCESS_QUEUE.poll();
             if (fifoKey != null) {
                 removeCacheEntry(fifoKey);
             }
@@ -105,13 +117,13 @@ public class Task2CacheProxy {
     }
 
     private static void removeCacheEntry(String key) {
-        cache.remove(key);
-        timeMap.remove(key);
+        CACHE.remove(key);
+        TIME_MAP.remove(key);
         deleteFromDisk(key);
     }
 
     private static void saveToDisk(String key, Object value) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheDir + "/" + key))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(CACHE_DIR + "/" + key))) {
             oos.writeObject(value);
         } catch (IOException e) {
             LOGGER.error("Error saving to disk: " + e.getMessage());
@@ -120,14 +132,14 @@ public class Task2CacheProxy {
 
     private static void deleteFromDisk(String key) {
         try {
-            Files.deleteIfExists(Paths.get(cacheDir + "/" + key));
+            Files.deleteIfExists(Paths.get(CACHE_DIR + "/" + key));
         } catch (IOException e) {
             LOGGER.error("Error deleting from disk: " + e.getMessage());
         }
     }
 
     private static Object loadFromDisk(String key) {
-        Path filePath = Paths.get(cacheDir + "/" + key);
+        Path filePath = Paths.get(CACHE_DIR + "/" + key);
         if (Files.exists(filePath)) {
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath.toFile()))) {
                 return ois.readObject();
@@ -145,12 +157,12 @@ public class Task2CacheProxy {
      * @throws IOException If there is an error while clearing the cache directory.
      */
     public static void clearCache(boolean clearDiskCache) throws IOException {
-        cache.clear();
-        timeMap.clear();
-        accessQueue.clear();
+        CACHE.clear();
+        TIME_MAP.clear();
+        ACCESS_QUEUE.clear();
 
         if (clearDiskCache) {
-            try (Stream<Path> paths = Files.walk(Paths.get(cacheDir))) {
+            try (Stream<Path> paths = Files.walk(Paths.get(CACHE_DIR))) {
                 paths.filter(Files::isRegularFile).forEach(filePath -> {
                     try {
                         Files.delete(filePath);
@@ -170,7 +182,7 @@ public class Task2CacheProxy {
      * @return The number of items in the cache.
      */
     static int getCacheSize() {
-        return cache.size();
+        return CACHE.size();
     }
 
     /**
@@ -180,6 +192,8 @@ public class Task2CacheProxy {
      * @return true if the item exists in the cache, false otherwise.
      */
     static boolean containsInCache(String key) {
-        return cache.containsKey(key);
+        return CACHE.containsKey(key);
     }
+
+    private Task2CacheProxy() {}
 }

@@ -65,7 +65,7 @@ public class Task2CacheProxyTest {
     public void testPersistenceToDisk() throws IOException {
         proxy.fib(5);
         String cacheKey = "fib" + "[5]";
-        String cacheFilePath = Task2CacheProxy.cacheDir + "/" + cacheKey;
+        String cacheFilePath = Task2CacheProxy.CACHE_DIR + "/" + cacheKey;
 
         Path cacheFile = Paths.get(cacheFilePath);
         assertThat(Files.exists(cacheFile)).isTrue();
@@ -81,7 +81,7 @@ public class Task2CacheProxyTest {
     public void testCustomCacheName() {
         simpleFibCalculator.fibAnnotated(5);
         String customCacheKey = "testName" + "[5]";
-        String cacheFilePath = Task2CacheProxy.cacheDir + "/" + customCacheKey;
+        String cacheFilePath = Task2CacheProxy.CACHE_DIR + "/" + customCacheKey;
 
         assertThat(Files.exists(Paths.get(cacheFilePath))).isTrue();
     }
