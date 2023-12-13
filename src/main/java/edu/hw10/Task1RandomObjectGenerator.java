@@ -273,7 +273,7 @@ import org.apache.logging.log4j.Logger;
 
     private String generateRandomString(Min min, Max max, ThreadLocalRandom random) {
         int targetStringLength = ThreadLocalRandom.current().nextInt(
-            random.nextInt((min != null) ? (int) min.value() : Integer.MIN_VALUE,
+            random.nextInt((min != null) ? (int) min.value() : 1,
             (max != null) ? (int) max.value() + 1 : Integer.MAX_VALUE)
         );
 

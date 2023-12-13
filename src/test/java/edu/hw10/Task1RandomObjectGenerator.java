@@ -47,7 +47,7 @@ class Task1RandomObjectGeneratorTest {
         int minField;
         int maxField;
 
-        public MyClass(@NotNull String notNullField, @Min(1) int minField, @Max(100) int maxField) {
+        public MyClass(@NotNull @Max(100) String notNullField, @Min(1) int minField, @Max(100) int maxField) {
             this.notNullField = notNullField;
             this.minField = minField;
             this.maxField = maxField;
