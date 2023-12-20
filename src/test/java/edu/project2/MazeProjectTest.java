@@ -6,6 +6,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import edu.hw9.Task3DynamicDFSSolver;
 
 public class MazeProjectTest {
 
@@ -19,7 +20,7 @@ public class MazeProjectTest {
         {new Cell(6, 0, Cell.Type.WALL), new Cell(6, 1, Cell.Type.WALL), new Cell(6, 2, Cell.Type.WALL), new Cell(6, 3, Cell.Type.WALL), new Cell(6, 4, Cell.Type.WALL), new Cell(6, 5, Cell.Type.WALL)}
     };
 
-    private final List<Solver> solvers = List.of(new BFSSolver(), new DFSSolver());
+    private final List<Solver> solvers = List.of(new BFSSolver(), new DFSSolver(), new Task3DynamicDFSSolver());
     private final List<Generator> generators = List.of(new DFSMazeGenerator(), new KruskalMazeGenerator());
 
     @Test
@@ -99,19 +100,14 @@ public class MazeProjectTest {
     @Test
     @DisplayName("Solvers does not find path when impossible")
     void solversDoesNotFindPathWhenImpossible() {
-        // инициализация лабиринта
         Maze maze = new Maze(testGrid);
 
-        // задаем начальную и конечную точку, где путь невозможен
         Coordinate start = new Coordinate(1, 1);
         Coordinate end = new Coordinate(5, 4);
 
         for (Solver solver : solvers)
         {
-            // получаем путь
             List<Coordinate> path = solver.solve(maze, start, end);
-
-            // проверяем, что путь не найден
             assertThat(path).isEmpty();
         }
     }
